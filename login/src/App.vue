@@ -4,7 +4,7 @@
       <v-list>
         <!-- items 배열을 읽어와서 메뉴로 바인딩 -->
         <v-list-item v-for="(item, i) in fnGetMenuItems" :key="i" :to="item.to">
-          <v-list-item-action>
+          <v-list-item-action >
             <!-- v-html을 사용하면 그 값이 html형식으로 들어간다 -->
             <v-icon v-html="item.icon"></v-icon>
           </v-list-item-action>
@@ -12,11 +12,18 @@
         </v-list-item>
 
         <!-- 로그인이 된 경우에만 로그아웃 버튼을 표시함 -->
-        <v-list-item v-if="login">
+        <v-list-item @click="fnDoLogout" v-if="fnGetAuthStatus">
           <v-list-item-action>
             <v-icon>mdi-arrow-right-bold-box-outline</v-icon>
           </v-list-item-action>
           <v-list-item-title>로그아웃</v-list-item-title>
+        </v-list-item>
+        <!-- 로그인이 된 경우에만 회원탈퇴 버튼을 표시함 -->
+        <v-list-item @click="fnDoDelete" v-if="fnGetAuthStatus">
+          <v-list-item-action>
+            <v-icon>mdi-arrow-right-bold-box</v-icon>
+          </v-list-item-action>
+          <v-list-item-title>회원탈퇴</v-list-item-title>
         </v-list-item>
 
       </v-list>
@@ -40,9 +47,14 @@
           {{item.title}}
         </v-btn>
         <!-- 로그인 된 경우에만 로그아웃 버튼을 표시 -->
-        <v-btn text v-if="login">
+        <v-btn @click="fnDoLogout" text v-if="fnGetAuthStatus">
           <v-icon left>mdi-arrow-right-bold-box-outline</v-icon>
           로그아웃
+        </v-btn>
+        <!-- 로그인 된 경우에만 회원탈퇴 버튼을 표시 -->
+        <v-btn @click="fnDoDelete" text v-if="fnGetAuthStatus">
+          <v-icon left>mdi-arrow-right-bold-box</v-icon>
+          회원탈퇴
         </v-btn>
       </v-toolbar-items>
     </v-app-bar>
@@ -62,13 +74,16 @@ export default {
   data() {
     return  {
       drawer : false,
-      login : false
     }
   },
   computed : {
+    // 스토어에서 현재 인증상태인지 반환(로그인)
+    fnGetAuthStatus() {
+      return this.$store.getters.fnGetAuthStatus
+    },
     // 로그인 여부에 따라 다르게 탐색서랍과 툴바메뉴명 항목 배열 반환
     fnGetMenuItems() {
-      if(!this.login) {
+      if(!this.fnGetAuthStatus) {
         return [{
           title : '회원가입',
           to : '/register',
@@ -82,6 +97,14 @@ export default {
         }]
       }
       
+    }
+  },
+  methods : {
+    fnDoLogout() {
+      this.$store.dispatch('fnDoLogout')
+    },
+    fnDoDelete(){
+      this.$store.dispatch('fnDoDelete')
     }
   }
 }
